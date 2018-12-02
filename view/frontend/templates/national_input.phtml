@@ -1,0 +1,965 @@
+<?php
+/**
+ * @var \MAGENTO\VersandForm\Block\Send $block
+ */
+
+// Calculate next 5 bussiness days
+$workDays = [];
+$date = new DateTime();
+
+for ( $i = 0; $i <= 5; $i++) {
+    $date->modify('+1 weekday');
+    array_push($workDays, $date->format('d.m.Y'));
+}
+
+?>
+<form onsubmit="checkIfDialogCanBeOpened()" id="form">
+<div class="flexbox">
+    <!--Absender-->
+    <fieldset>
+        <legend>ABSENDER</legend>
+        <div class="mv-outer-flex-item">
+
+            <!--Copy Button -->
+            <div class="mv-inner-flexbox" id="mv-last-flexbox">
+                <button id="mv-copy-button-abs" type="button" onclick="copyValues('abs')" title="Werte von Empfänger kopieren">Kopieren <--</button>
+            </div>
+            <!--Firma-->
+            <div class="mv-inner-flexbox">
+
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label title="<?php echo $block->getRequiredFieldsDescription() ?>" for="absender_name">Firma / Name*:</label>
+                </div>
+                <!--INPUT-->
+                <div class="mv-inner-flex-input">
+                    <input type="text" id="absender_name" onkeyup="validateSpecificField('absender_name')"  title="Dises Feld muss ausgefüllt sein und darf maximal 256 zeichen enthalten" required>
+                </div>
+            </div>
+            <!--Zusatz-->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label for="absender_zusatz">Zusatz:</label>
+                </div>
+                <!--INPUT-->
+                <div class="mv-inner-flex-input">
+                    <input type="text" id="absender_zusatz"  onkeyup="validateSpecificField('absender_zusatz')" title="Dises Feld maximal 256 zeichen enthalten.">
+                </div>
+            </div>
+            <!--Ansprechpartner-->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label for="ansprechpartner">Ansprechpartner:</label>
+                </div>
+                <!--INPUT-->
+                <div class="mv-inner-flex-input">
+                    <input type="text" id="absender_ansprechpartner"  onkeyup="validateSpecificField('absender_ansprechpartner')" title="Dises Feld maximal 256 zeichen enthalten.">
+                </div>
+            </div>
+            <!--Anschrift-->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label for="str" title="<?php echo $block->getRequiredFieldsDescription() ?>">Str. / Hausnr.*:</label>
+                </div>
+                <!--INPUT 1 50-->
+                <div class="mv-inner-flex-49">
+                    <input type="text" id="absender_str" onkeyup="validateSpecificField('absender_str')" title="Bitte geben Sie eine gültige Straße ein." required>
+                </div>
+                <!--INPUT 2 20-->
+                <div class="mv-inner-flex-20">
+                    <input type="text" id="absender_hausnr" class="hausnr" onkeyup="validateSpecificField('absender_hausnr')" title="Bitte geben Sie eine gültige Hausnummer ein." required>
+                </div>
+            </div>
+            <!--PLZ / ORT -->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label for="absender_plz" title="<?php echo $block->getRequiredFieldsDescription() ?>">PLZ / Ort*:</label>
+                </div>
+                <!--INPUT 1 20-->
+                <div class="mv-inner-flex-20">
+                    <input type="text" id="absender_plz" pattern="[0-9]{5}" onkeyup="validateSpecificField('absender_plz')" title="Postleizahl sollte 5 Stellen aufweisen und nur aus Nummern bestehen." required>
+                </div>
+                <!--INPUT 2 49-->
+                <div class="mv-inner-flex-49">
+                    <input type="text" id="absender_ort" onkeyup="validateSpecificField('absender_ort')" class="ort" title="Ort darf maximal 128 Zeichen groß sein." required>
+                </div>
+            </div>
+            <!--LAND-->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label for="land" title="<?php echo $block->getRequiredFieldsDescription() ?>">Land*:</label>
+                </div>
+                <!--INPUT 1 20-->
+                <div class="mv-inner-flex-input">
+                    <select name="land" id="absender_land" onchange="validateSpecificField('absender_land')" required>
+                        <option value="Deutschland" selected>Deutschland</option>
+                        <option value="Oestereich">&Ouml;sterreich</option>
+                        <option value="Schweiz">Schweiz</option>
+                    </select>
+                </div>
+            </div>
+            <!--Telefon-->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label for="tel">Telefon:</label>
+                </div>
+                <!--INPUT-->
+                <div class="mv-inner-flex-input">
+                    <input type="text" pattern="[0-9]*\/*(\+49)*[ ]*(\([0-9]+\))*([ ]*(-|–)*[ ]*[0-9]+)*" title="Telefonummer sollte aus nummern bestehen reggex : [0-9]*\/*(\+49)*[ ]*(\([0-9]+\))*([ ]*(-|–)*[ ]*[0-9]+)" id="absender_tel">
+                </div>
+            </div>
+        </div>
+    </fieldset>
+
+    <!--EMPFÄNGER-->
+    <fieldset id="mv-fieldset-empfanger">
+        <legend>EMPFÄNGER</legend>
+        <div class="mv-outer-flex-item">
+            <!--Copy Button -->
+            <div class="mv-inner-flexbox" id="mv-last-flexbox">
+                <button id="mv-copy-button-empf" type="button" onclick="copyValues('empf')" title="Werte von Absender kopieren">--> Kopieren</button>
+            </div>
+            <!--Firma-->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label title="<?php echo $block->getRequiredFieldsDescription() ?>" for="empfaenger_name">Firma / Name*:</label>
+                </div>
+                <!--INPUT-->
+                <div class="mv-inner-flex-input">
+                    <input type="text" id="empfaenger_name" onkeyup="validateSpecificField('empfaenger_name')"   title="Dises Feld muss ausgefüllt sein und darf maximal 256 zeichen enthalten" required>
+                </div>
+            </div>
+            <!--Zusatz-->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label for="empfaenger_zusatz">Zusatz:</label>
+                </div>
+                <!--INPUT-->
+                <div class="mv-inner-flex-input">
+                    <input type="text" id="empfaenger_zusatz" title="Dises Feld maximal 256 zeichen enthalten.">
+                </div>
+            </div>
+            <!--Ansprechpartner-->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label for="ansprechpartner">Ansprechpartner:</label>
+                </div>
+                <!--INPUT-->
+                <div class="mv-inner-flex-input">
+                    <input type="text" id="empfaenger_ansprechpartner" title="Dises Feld maximal 256 zeichen enthalten.">
+                </div>
+            </div>
+            <!--Anschrift-->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label for="empfaenger_str" title="<?php echo $block->getRequiredFieldsDescription() ?>">Str. / Hausnr.*:</label>
+                </div>
+                <!--INPUT 1 50-->
+                <div class="mv-inner-flex-49">
+                    <input type="text" id="empfaenger_str" onkeyup="validateSpecificField('empfaenger_str')"title="Bitte geben Sie eine gültige Straße ein." required>
+                </div>
+                <!--INPUT 2 20-->
+                <div class="mv-inner-flex-20">
+                    <input type="text" id="empfaenger_hausnr" class="hausnr" onkeyup="validateSpecificField('empfaenger_hausnr')" title="Bitte geben Sie eine gültige Hausnummer ein." required>
+                </div>
+            </div>
+            <!--PLZ / ORT -->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label for="empfaenger_plz" title="<?php echo $block->getRequiredFieldsDescription() ?>">PLZ / Ort*:</label>
+                </div>
+                <!--INPUT 1 20-->
+                <div class="mv-inner-flex-20">
+                    <input type="text" id="empfaenger_plz"  pattern="[0-9]{5}" onkeyup="validateSpecificField('empfaenger_plz')" title="Postleizahl sollte 5 Stellen aufweisen und nur aus Nummern bestehen." required>
+                </div>
+                <!--INPUT 2 49-->
+                <div class="mv-inner-flex-49">
+                    <input type="text" id="empfaenger_ort" class="ort" onkeyup="validateSpecificField('empfaenger_ort')" title="Ort darf maximal 128 Zeichen groß sein." required>
+                </div>
+            </div>
+            <!--LAND-->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label for="empfaenger_land" title="<?php echo $block->getRequiredFieldsDescription() ?>>">Land*:</label>
+                </div>
+                <!--INPUT 1 20-->
+                <div class="mv-inner-flex-input">
+                    <select name="land" id="empfaenger_land" required>
+                        <option value="Deutschland" selected>Deutschland</option>
+                        <option value="Oestereich">&Ouml;sterreich</option>
+                        <option value="Schweiz">Schweiz</option>
+                    </select>
+                </div>
+            </div>
+            <!--Telefon-->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label for="empfaenger_tel">Telefon:</label>
+                </div>
+                <!--INPUT-->
+                <div class="mv-inner-flex-input">
+                    <input type="text" id="empfaenger_tel" pattern="[0-9]*\/*(\+49)*[ ]*(\([0-9]+\))*([ ]*(-|–)*[ ]*[0-9]+)*" title="Telefonummer sollte aus nummern bestehen reggex : [0-9]*\/*(\+49)*[ ]*(\([0-9]+\))*([ ]*(-|–)*[ ]*[0-9]+)">
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</div>
+
+<hr>
+<!--ABHOLZEIT-->
+<div class="flexbox">
+    <fieldset id="mv-fieldset-abholzeit">
+        <legend>ABHOLZEIT</legend>
+        <div class="mv-outer-flex-item">
+            <div>
+                <div class="mv-inner-flexbox">
+                    <!--ICON-->
+                    <div class="mv-inner-flex-label text-align">
+                        <img src='<?php echo $block->getViewFileUrl('Magento_VersandForm::images/info.png'); ?>' alt="INFO" class="mv-img-inner-info">
+                    </div>
+
+                    <div class="mv-inner-flex-input">
+                        <span class="mv-info-color">Bitte beachten Sie, dass wir im Falle einer erfolglosen Abholung eine Gebühr von 10€ berechnen müssen.</span>
+                    </div>
+                </div>
+            </div>
+            <!--Standardabholtermin-->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label title="<?php echo $block->getRequiredFieldsDescription() ?>" for="abholzeit_abholdatum">Abholdatum:</label>
+                </div>
+
+                <!--INPUT-->
+                <div class="mv-inner-flex-input">
+                    <select name="mv-abholzeit-abholzeit" id="abholzeit_abholdatum">
+                        <?php
+                            foreach ($workDays as $key => $value):
+                            echo '<option value="'.$value.'">'.$value.'</option>';
+                            endforeach;
+                        ?>
+                    </select>
+                </div>
+
+
+            </div>
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label title="<?php echo $block->getRequiredFieldsDescription() ?>" for="abolzeit_standard">Termin*:</label>
+                </div>
+                <!--INPUT-->
+                <div class="mv-inner-flex-input">
+                    <input type="radio" id="abolzeit_standard" onclick="checkIfWunschAndCalculateSubmit()" name="abholzeit_radio" checked="checked">
+                    <label for="abolzeit_standard">
+                        Standardabholtermin
+                        <br>
+                        <span class="mv-info-color">(zwischen 09:00 und 17:00 Uhr)</span>
+                    </label>
+                    <br>
+                    <input type="radio" id="abolzeit_wunsch" onclick="checkIfWunschAndCalculateSubmit('wunsch')" name="abholzeit_radio" required>
+                    <label for="abolzeit_wunsch">
+                        Wunschabholtermin - <strong>5,50 EUR</strong>
+                    </label>
+                    <div id="select-wunschabholzeit">
+                        <select name="mv-abholzeit-wunschabholzeit" id="abholzeit_wunsch">
+                            <option value="08:00-10:00" selected>08:00 - 10:00 Uhr</option>
+                            <option value="10:00-12:00">10:00 - 12:00 Uhr</option>
+                            <option value="12:00-14:00">12:00 - 14:00 Uhr</option>
+                            <option value="14:00-16:00">14:00 - 16:00 Uhr</option>
+                            <option value="16:00-18:00">16:00 - 18:00 Uhr</option>
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </fieldset>
+
+    <!--ZUSTELLTERMIN-->
+    <fieldset id="mv-fieldset-zustelltermin" class="ml10">
+        <legend>ZUSTELLTERMIN</legend>
+        <div class="mv-outer-flex-item">
+            <div>
+                <div class="mv-inner-flexbox">
+                    <!--ICON-->
+                    <div class="mv-inner-flex-label text-align">
+                        <img src='<?php echo $block->getViewFileUrl('Magento_VersandForm::images/info.png'); ?>' alt="INFO" class="mv-img-inner-info">
+                    </div>
+
+                    <div class="mv-inner-flex-input">
+                        <span class="mv-info-color">Standardzustelltermin = Ihre Sendung wird in der Regel am nächsten Werktag (Werktage bei uns Mo-Fr) bis 17 Uhr zugestellt.</span>
+                    </div>
+                </div>
+            </div>
+            <!--Standardzustellterminn-->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label title="<?php echo $block->getRequiredFieldsDescription() ?>" for="zustelltermin_standard">Termin*:</label>
+                </div>
+                <!--INPUT-->
+                <div class="mv-inner-flex-input">
+                    <!--STANDARD-->
+                    <input type="radio" id="zustelltermin_standard" onclick="calculateSubmitFieldswithTermin('standard')" name="zustelltermin_radio" checked="checked">
+                    <label for="zustelltermin_standard">
+                        Standardzustelltermin
+                    </label>
+                    <br>
+
+                    <!--Termin - 09:00-->
+                    <input type="radio" id="zustelltermin_termin_9" onclick="calculateSubmitFieldswithTermin('termin9')" name="zustelltermin_radio">
+                    <label for="zustelltermin_termin_9">
+                        Termin bis 09:00 Uhr - <strong>15,50 EUR</strong>
+                    </label>
+                    <br>
+
+                    <!--Termin - 10:00-->
+                    <input type="radio" id="zustelltermin_termin_10" onclick="calculateSubmitFieldswithTermin('termin10')" name="zustelltermin_radio">
+                    <label for="zustelltermin_termin_10">
+                        Termin bis 10:00 Uhr - <strong>13,00 EUR</strong>
+                    </label>
+                    <br>
+
+                    <!--Termin - 12:00-->
+                    <input type="radio" id="zustelltermin_termin_12" onclick="calculateSubmitFieldswithTermin('termin12')" name="zustelltermin_radio">
+                    <label for="zustelltermin_termin_12">
+                        Termin bis 12:00 Uhr - <strong>8,00 EUR</strong>
+                    </label>
+                    <br>
+
+                    <!--FIXTERMIN-->
+                    <input type="radio" id="zustelltermin_fix" onclick="calculateSubmitFieldswithTermin('fix')" name="zustelltermin_radio" required>
+                    <label for="zustelltermin_fix">
+                        Fixtermin - <strong>40,00 EUR</strong>
+                        <br>
+                        <span class="mv-info-color">Zustellung zum gewünschten Termin +/- 30 min. </span>
+                    </label>
+                    <div id="select-fixtermin">
+                        <br>
+                        <select name="mv-zustelltermin-fixtermin" id="zustelltermin_fix_select">
+                            <option value="09:00" >09:00 Uhr</option>
+                            <option value="09:30" >09:30 Uhr</option>
+                            <option value="10:00" >10:00 Uhr</option>
+                            <option value="10:30" >10:30 Uhr</option>
+                            <option value="11:00" >11:00 Uhr</option>
+                            <option value="11:30" >11:30 Uhr</option>
+                            <option value="12:00" >12:00 Uhr</option>
+                            <option value="12:30" >12:30 Uhr</option>
+                            <option value="13:00" >13:00 Uhr</option>
+                            <option value="13:30" >13:30 Uhr</option>
+                            <option value="14:00" >14:00 Uhr</option>
+                            <option value="14:30" >14:30 Uhr</option>
+                            <option value="15:00" >15:00 Uhr</option>
+                            <option value="15:30" >15:30 Uhr</option>
+                            <option value="16:00" >16:00 Uhr</option>
+
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </fieldset>
+</div>
+
+<div class="flexbox">
+    <!--SONDERDIENST-->
+    <fieldset id="mv-fieldset-sonderdienste">
+        <legend>SONDERDIENST</legend>
+        <div class="mv-outer-flex-item">
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label title="<?php echo $block->getRequiredFieldsDescription() ?>" for="sonderdienst_standard">Termin*:</label>
+                </div>
+                <!--INPUT-->
+                <div class="mv-inner-flex-input">
+                    <!--STANDARD-->
+                    <input type="radio" id="sonderdienst_standard" onclick="calculateSubmitFieldswithSonderTermin('standard')" name="sonderdienst_radio" checked="checked">
+                    <label for="sonderdienst_standard">
+                        Standardzustellung
+                    </label>
+                    <br>
+
+                    <!--Persönlich-->
+                    <input type="radio" id="sonderdienst_persoenlich" onclick="calculateSubmitFieldswithSonderTermin('persoenlich')" name="sonderdienst_radio">
+                    <label for="sonderdienst_persoenlich">
+                        Pers&ouml;nliche Zustellung - <strong>8,00 EUR</strong>
+                    </label>
+                        <div id="sonderdienst_box_persoenlich">
+                            <br>
+                            <span class="mv-info-color">Bitte geben Sie an, ob es sich bei der Empfänger-Adresse um eine Privatadresse oder um eine Firmenadresse handelt.</span>
+                            <br>
+                            <!--Privatadresse-->
+                            <input type="radio" id="sonderdienst_persoenlich_privat" class="mv-margin-left-50" name="sonderdienst_persoenlich_radio" onkeyup="validateSpecificField('sonderdienst_persoenlich_privat')" a>
+                            <label for="sonderdienst_persoenlich_privat">
+                                Privatadresse
+                            </label>
+
+                            <br>
+
+                            <!--Firmenadresse-->
+                            <input type="radio" id="sonderdienst_persoenlich_firma" class="mv-margin-left-50" name="sonderdienst_persoenlich_radio" onkeyup="validateSpecificField('sonderdienst_persoenlich_firma')" >
+                            <label for="sonderdienst_persoenlich_firma">
+                                Firmenadresse
+                            </label>
+                        </div>
+                    <br>
+
+                    <!--Persönlich mit IdentPrüfung-->
+                    <input type="radio" id="sonderdienst_persoenlich_withIdent" onclick="calculateSubmitFieldswithSonderTermin('ident')" name="sonderdienst_radio">
+                    <label for="sonderdienst_persoenlich_withIdent">
+                        Pers&ouml;nliche Zustellung mit Identprüfung - <strong>10,50 EUR</strong>
+                    </label>
+                    <div id="sonderdienst_box_persoenlich_withIdent">
+                        <br>
+                        <span class="mv-info-color">Bitte geben Sie an, ob es sich bei der Empfänger-Adresse um eine Privatadresse oder um eine Firmenadresse handelt.</span>
+                        <br>
+                        <!--Privatadresse-->
+                        <input type="radio" id="sonderdienst_persoenlich_withIdent_privat" class="mv-margin-left-50" name="sonderdienst_persoenlich_withIdent_radio" onkeyup="validateSpecificField('sonderdienst_persoenlich_withIdent_privat')" >
+                        <label for="sonderdienst_persoenlich_withIdent_privat">
+                            Privatadresse
+                        </label>
+
+                        <br>
+
+                        <!--Firmenadresse-->
+                        <input type="radio" id="sonderdienst_persoenlich_withIdent_firma" class="mv-margin-left-50" name="sonderdienst_persoenlich_withIdent_radio" onkeyup="validateSpecificField('sonderdienst_persoenlich_withIdent_firma')">
+                        <label for="sonderdienst_persoenlich_withIdent_firma">
+                            Firmenadresse
+                        </label>
+                    </div>
+                    <br>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset id="mv-fieldset-sendungsdaten">
+        <legend>SENDUNGSDATEN</legend>
+        <div class="mv-outer-flex-item">
+            <!--Gewicht-->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label title="<?php echo $block->getRequiredFieldsDescription() ?>" for="sendungsdaten_kg">Gewicht*:</label>
+                </div>
+
+                <!--INPUT-->
+                <div class="mv-inner-flex-input">
+                    bis
+                    <select name="mv-select-sendungsdaten-kg" id="sendungsdaten_kg" onchange="updateSubmitFields()">
+                        <option value="1">1,00 kg</option>
+                        <option value="2">2,00 kg</option>
+                        <option value="3" selected>3,00 kg</option>
+                        <option value="4">4,00 kg</option>
+                        <option value="5">5,00 kg</option>
+                        <option value="6">6,00 kg</option>
+                        <option value="7">7,00 kg</option>
+                        <option value="8">8,00 kg</option>
+                        <option value="9">9,00 kg</option>
+                        <option value="10">10,00 kg</option>
+                        <option value="11">11,00 kg</option>
+                        <option value="12">12,00 kg</option>
+                        <option value="13">13,00 kg</option>
+                        <option value="14">14,00 kg</option>
+                        <option value="15">15,00 kg</option>
+                        <option value="16">16,00 kg</option>
+                        <option value="17">17,00 kg</option>
+                        <option value="18">18,00 kg</option>
+                        <option value="19">19,00 kg</option>
+                        <option value="20">20,00 kg</option>
+                        <option value="21">21,00 kg</option>
+                        <option value="22">22,00 kg</option>
+                        <option value="23">23,00 kg</option>
+                        <option value="24">24,00 kg</option>
+                        <option value="25">25,00 kg</option>
+                        <option value="26">26,00 kg</option>
+                        <option value="27">27,00 kg</option>
+                        <option value="28">28,00 kg</option>
+                        <option value="29">29,00 kg</option>
+                        <option value="30">30,00 kg</option>
+                    </select>
+                </div>
+            </div>
+
+            <!--Wert-->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label title="<?php echo $block->getRequiredFieldsDescription() ?>" for="sendungsdaten_wert">Wert in EUR*:</label>
+                </div>
+                <!--INPUT-->
+                <div class="mv-inner-flex-input">
+                    <input type="text" name="sendungsdaten_wert"  id="sendungsdaten_wert"  placeholder="0,00" pattern="[0-9]{1,12}"  onkeyup="validateSpecificField('sendungsdaten_wert')" title="Bitte geben Sie den Wert ihrer Sendung in nummern an." required>
+                </div>
+            </div>
+
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label title="<?php echo $block->getRequiredFieldsDescription() ?>" for="sendungsdaten_wert">Transportvers.*:</label>
+                </div>
+
+                <!--INPUT-->
+                <div class="mv-inner-flex-input">
+
+                    <input type="radio" name="sendungsdaten_versicherung" id="sendungsdaten_sendungsdaten-nein" checked="checked" onclick="checkIfYesAndCalculateInsurance()">
+                    <label for="sendungsdaten_sendungsdaten-ja">Nein</label>
+
+                    <br>
+
+                    <input type="radio" name="sendungsdaten_versicherung" id="sendungsdaten_sendungsdaten-ja" onclick="checkIfYesAndCalculateInsurance('y')">
+                    <label for="sendungsdaten_sendungsdaten-ja">Ja</label>
+
+                    <div id="mv-display-transportversicherung">
+                        <input type="text" id="sendungdaten_transportversicherung" placeholder="0,00"> EUR
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </fieldset>
+</div>
+
+<hr>
+
+<div class="flexbox" id="mv-last-flexbox">
+    <!--Auftragsbestätigung-->
+    <fieldset>
+        <legend>Auftragsbestätigung und Rechnung</legend>
+        <div class="mv-outer-flex-item">
+            <!--E-Mail Adresse-->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label title="Diese Daten werden für die Auftragsbestätigung und Rechnung gebraucht" for="email">E-Mail Adresse*:</label>
+                </div>
+                <!--INPUT-->
+                <div class="mv-inner-flex-input">
+                    <input type="email" id="auftragsbest_email"  onkeyup="validateSpecificField('auftragsbest_email')"  required>
+                </div>
+            </div>
+
+            <!--Telefon-->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label title="Diese Daten werden für die Auftragsbestätigung und Rechnung gebraucht" for="tel">Telefon*:</label>
+                </div>
+                <!--INPUT-->
+                <div class="mv-inner-flex-input">
+                    <input type="text" id="auftragsbest_tel" onkeyup="validateSpecificField('auftragsbest_tel')" pattern="[0-9]*\/*(\+49)*[ ]*(\([0-9]+\))*([ ]*(-|–)*[ ]*[0-9]+)*" title="Telefonummer sollte aus nummern bestehen reggex : [0-9]*\/*(\+49)*[ ]*(\([0-9]+\))*([ ]*(-|–)*[ ]*[0-9]+)" required>
+                </div>
+            </div>
+
+            <!--Rechnungsadresse-->
+            <div class="mv-inner-flexbox">
+                <!--LABEL-->
+                <div class="mv-inner-flex-label">
+                    <label for="tel">Rechnungsadresse:</label>
+                </div>
+                <!--INPUT-->
+                <div class="mv-inner-flex-input">
+                    <input type="radio" id="auftragsbest_absender" name="auftrag" onclick="checkIfManual()" onchange="validateSpecificField('auftragsbest_absender')"required>
+                    <label for="auftragsbest_absender">wie Absender</label>
+                    <br>
+                    <input type="radio" id="auftragsbest_empfaenger" name="auftrag" onclick="checkIfManual()" onchange="validateSpecificField('auftragsbest_empfaenger')" required>
+                    <label for="auftragsbest_empfaenger">wie Empf&auml;nger</label>
+                    <br>
+                    <input type="radio" id="auftragsbest_manuell" name="auftrag" onclick="checkIfManual('manu')" onchange="validateSpecificField('auftragsbest_manuell')" required>
+                    <label for="auftragsbest_manuell">manuelle Eingabe</label>
+                </div>
+            </div>
+
+            <!--Anrede-->
+            <div id="manuell_eingabe">
+                <div class="mv-inner-flexbox">
+                    <!--LABEL-->
+                    <div class="mv-inner-flex-label">
+                        <label for="herr">Rechnungsadresse:</label>
+                    </div>
+                    <!--INPUT-->
+                    <div class="mv-inner-flex-input">
+                        <input type="radio" id="auftragsbest_herr" name="anrede" value="herr" onchange="validateSpecificField('auftragsbest_herr')">
+                        <label for="auftragsbest_herr">Herr</label>
+                        <br>
+                        <input type="radio" id="auftragsbest_frau" name="anrede" value="frau" onchange="validateSpecificField('auftragsbest_frau')">
+                        <label for="auftragsbest_frau">Frau</label>
+                        <br>
+                        <input type="radio" id="auftragsbest_firma" name="anrede" value="firma" onchange="validateSpecificField('auftragsbest_firma')">
+                        <label for="auftragsbest_firma">Firma</label>
+                    </div>
+                </div>
+
+                <!--Firma-->
+                <div class="mv-inner-flexbox">
+                    <!--LABEL-->
+                    <div class="mv-inner-flex-label">
+                        <label title="Diese Daten werden für die Auftragsbestätigung und Rechnung gebraucht" for="name">Firma / Name*:</label>
+                    </div>
+                    <!--INPUT-->
+                    <div class="mv-inner-flex-input">
+                        <input type="text" id="auftragsbest_name" onkeyup="validateSpecificField('auftragsbest_name')" pattern="[A-za-z0-9]{1,256}" title="Dises Feld muss ausgefüllt sein und darf maximal 256 zeichen enthalten">
+                    </div>
+                </div>
+                <!--Zusatz-->
+                <div class="mv-inner-flexbox">
+                    <!--LABEL-->
+                    <div class="mv-inner-flex-label">
+                        <label for="auftragsbest_zusatz">Zusatz:</label>
+                    </div>
+                    <!--INPUT-->
+                    <div class="mv-inner-flex-input">
+                        <input type="text" id="auftragsbest_zusatz" title="Dises Feld maximal 256 zeichen enthalten.">
+                    </div>
+                </div>
+
+                <!--Anschrift-->
+                <div class="mv-inner-flexbox">
+                    <!--LABEL-->
+                    <div class="mv-inner-flex-label">
+                        <label for="str" title="Diese Daten werden für die Auftragsbestätigung und Rechnung gebraucht">Str. / Hausnr.*:</label>
+                    </div>
+                    <!--INPUT 1 50-->
+                    <div class="mv-inner-flex-49">
+                        <input type="text" id="auftragsbest_str" onkeyup="validateSpecificField('auftragsbest_str')" title="Bitte geben Sie eine gültige Straße ein.">
+                    </div>
+                    <!--INPUT 2 20-->
+                    <div class="mv-inner-flex-20">
+                        <input type="text" id="auftragsbest_hausnr" onkeyup="validateSpecificField('auftragsbest_hausnr')" title="Bitte geben Sie eine gültige Hausnummer ein." class="hausnr">
+                    </div>
+                </div>
+                <!--PLZ / ORT -->
+                <div class="mv-inner-flexbox">
+                    <!--LABEL-->
+                    <div class="mv-inner-flex-label">
+                        <label for="auftragsbest_plz" title="Diese Daten werden für die Auftragsbestätigung und Rechnung gebraucht">PLZ / Ort*:</label>
+                    </div>
+                    <!--INPUT 1 20-->
+                    <div class="mv-inner-flex-20">
+                        <input type="text" id="auftragsbest_plz" onkeyup="validateSpecificField('auftragsbest_plz')" pattern="[0-9]{5}"title="Postleizahl sollte 5 Stellen aufweisen und nur aus Nummern bestehen.">
+                    </div>
+                    <!--INPUT 2 49-->
+                    <div class="mv-inner-flex-49">
+                        <input type="text" id="auftragsbest_ort" onkeyup="validateSpecificField('auftragsbest_ort')" class="ort"  title="Ort darf maximal 128 Zeichen groß sein.">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</div>
+
+<div class="flexbox" id="mv-submit-container">
+    <div class="mv-outer-flex-item text-align" id="mv-result-container">
+        <strong><span>Preis exkl. MwSt. <input type="number" id="submit_exkl-mwst" disabled> EUR</span></strong>
+
+        <strong><span>Preis inkl. MwSt. <input type="number" id="submit_inkl-mwst" disabled> EUR</span></strong>
+        <div class="mv-info-color">
+            (berechnet anhand Gewicht <input type="text" id="submit_kg" disabled> kg)
+        </div>
+    </div>
+    <div class="mv-outer-flex-item text-align" id="mv-button-container">
+            <button type="submit" id="mv-submit-button" onclick="validateRequiredFields()">Weiter</button>
+    </div>
+</div>
+
+</form>
+
+
+<!--DIALOG-->
+<div class="dialog__wrapper">
+    <div class="dialog">
+        <div class="dialog__content">
+            <form action="<?php echo $block->getFormAction() ?>" name="confirmForm">
+                <div class="flexbox">
+                    <div class="mv-outer-flex-item" id="dialogAbsender_data">
+                        <!--ABSENDER-->
+                        <h3>Absender</h3>
+                        <!--DIALOG - FIRMA-->
+                        <div class="mv-inner-flexbox" >
+                            <!--LABEL-->
+                            <div class="mv-inner-flex-label">
+                                <label for="dialogAbsender_name">Firma / Name:</label>
+                            </div>
+                            <!--INPUT-->
+                            <div class="mv-inner-flex-input">
+                                {{ absname }}
+                            </div>
+                        </div>
+
+                        <!--DIALOG - Str / Hausnur-->
+                        <div class="mv-inner-flexbox">
+                            <!--LABEL-->
+                            <div class="mv-inner-flex-label">
+                                <label for="dialogAbsender_strHausnr">Str. / Hausnr.:</label>
+                            </div>
+                            <!--INPUT-->
+                            <div class="mv-inner-flex-input">
+                                {{ strHausNr }}
+                            </div>
+                        </div>
+
+                        <!--DIALOG - PLZ / Ort-->
+                        <div class="mv-inner-flexbox">
+                            <!--LABEL-->
+                            <div class="mv-inner-flex-label">
+                                <label for="dialogAbsender_plzOirt">PLZ - Ort:</label>
+                            </div>
+                            <!--INPUT-->
+                            <div class="mv-inner-flex-input">
+                                {{ plzOrt }}
+                            </div>
+                        </div>
+
+                        <!--DIALOG - Land-->
+                        <div class="mv-inner-flexbox">
+                            <!--LABEL-->
+                            <div class="mv-inner-flex-label">
+                                <label for="dialogAbsender_land">Land:</label>
+                            </div>
+                            <!--INPUT-->
+                            <div class="mv-inner-flex-input">
+                                {{ land }}
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="mv-outer-flex-item" id="dialogEmpfaenger_data">
+                        <!--Empfänger-->
+                        <h3>Empfänger</h3>
+                        <!--DIALOG - Empfänger- FIRMA-->
+                        <div class="mv-inner-flexbox">
+                            <!--LABEL-->
+                            <div class="mv-inner-flex-label">
+                                <label for="dialogempf_name">Firma / Name:</label>
+                            </div>
+                            <!--INPUT-->
+                            <div class="mv-inner-flex-input">
+                                {{ empfname }}
+                            </div>
+                        </div>
+
+                        <!--DIALOG - EmpfängerStr / Hausnur-->
+                        <div class="mv-inner-flexbox">
+                            <!--LABEL-->
+                            <div class="mv-inner-flex-label">
+                                <label for="dialogempf_strHausnr">Str. / Hausnr.:</label>
+                            </div>
+                            <!--INPUT-->
+                            <div class="mv-inner-flex-input">
+                                {{ strHausNr }}
+                            </div>
+                        </div>
+
+                        <!--DIALOG - Empfänger - PLZ / Ort-->
+                        <div class="mv-inner-flexbox">
+                            <!--LABEL-->
+                            <div class="mv-inner-flex-label">
+                                <label for="dialogempf_plzOirt">PLZ - Ort:</label>
+                            </div>
+                            <!--INPUT-->
+                            <div class="mv-inner-flex-input">
+                                {{ plzOrt }}
+                            </div>
+                        </div>
+
+                        <!--DIALOG - Empfänger - Land-->
+                        <div class="mv-inner-flexbox">
+                            <!--LABEL-->
+                            <div class="mv-inner-flex-label">
+                                <label for="dialogempf_land">Land:</label>
+                            </div>
+                            <!--INPUT-->
+                            <div class="mv-inner-flex-input">
+                                {{ land }}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <hr>
+
+                <div class="flexbox">
+                    <div class="mv-outer-flex-item">
+                        <h3>Zusammenfassung</h3>
+                        <div class="mv-zsm-box">
+                            <div id="dialogSendungsdaten_data">
+                                <div class="mv-inner-flexbox" >
+                                    <!--LABEL-->
+                                    <div class="mv-inner-flex-label ">
+                                        <label for="dialogAbsender_name">Wert der Sendung:</label>
+                                    </div>
+                                    <!--INPUT-->
+                                    <div class="mv-inner-flex-input">
+                                        {{ wert }}
+                                    </div>
+                                </div>
+
+                                <div class="mv-inner-flexbox" >
+                                    <!--LABEL-->
+                                    <div class="mv-inner-flex-label ">
+                                        <label for="dialogAbsender_name">Gewicht der Sendung:</label>
+                                    </div>
+                                    <!--INPUT-->
+                                    <div class="mv-inner-flex-input">
+                                        {{ gewicht }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="dialogAbholzeit_data">
+                                <div class="mv-inner-flexbox" >
+                                    <!--LABEL-->
+                                    <div class="mv-inner-flex-label ">
+                                        <label for="dialogAbsender_name">Abholdatum:</label>
+                                    </div>
+                                    <!--INPUT-->
+                                    <div class="mv-inner-flex-input">
+                                        {{ abholDatum }}
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="mv-inner-flexbox">
+                                    <!--LABEL-->
+                                    <div class="mv-inner-flex-label mv-width">
+                                        <label for="dialogAbsender_name"><strong>Grundpreis</strong></label>
+                                    </div>
+                                    <!--INPUT-->
+                                    <div class="mv-inner-flex-input mv-margin-left-50">
+                                        <strong>20,00 EUR</strong>
+                                    </div>
+                                </div>
+
+                                <div class="mv-inner-flexbox">
+                                    <!--LABEL-->
+                                    <div class="mv-inner-flex-label mv-width">
+                                        <label for="dialogAbsender_name">+ {{ abholTermin }}</label>
+                                    </div>
+                                    <!--INPUT-->
+                                    <div class="mv-inner-flex-input mv-margin-left-50">
+                                        {{ kosten }}
+                                    </div>
+                                </div>
+                            </div>
+                                <div id="dialogZustelltermin_data">
+                                    <div class="mv-inner-flexbox">
+                                        <!--LABEL-->
+                                        <div class="mv-inner-flex-label mv-width">
+                                            <label for="dialogAbsender_name">+ {{ zustellerTermin }}</label>
+                                        </div>
+                                        <!--INPUT-->
+                                        <div class="mv-inner-flex-input mv-margin-left-50">
+                                            {{ kosten }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                            <div id="dialogSonderdienst_data">
+                                <div class="mv-inner-flexbox" >
+                                    <!--LABEL-->
+                                    <div class="mv-inner-flex-label mv-width">
+                                        <label for="dialogAbsender_name">+ {{ sonderdienstTermin }}</label>
+                                    </div>
+                                    <!--INPUT-->
+                                    <div class="mv-inner-flex-input mv-margin-left-50">
+                                        {{ kosten }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="dialogSsendungsDataTransportVers_data">
+                                <div class="mv-inner-flexbox">
+                                    <!--LABEL-->
+                                    <div class="mv-inner-flex-label mv-width">
+                                        <label for="dialogAbsender_name">+ Transportversicherung</label>
+                                    </div>
+                                    <!--INPUT-->
+                                    <div class="mv-inner-flex-input mv-margin-left-50">
+                                        {{ transportVers }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <br>
+                            <div id="dialogAuftragswert_data">
+                                <div class="mv-inner-flexbox" >
+                                    <!--LABEL-->
+                                    <div class="mv-inner-flex-label mv-width">
+                                        <label for="dialogAbsender_name"><strong>Auftragswert</strong></label>
+                                    </div>
+                                    <!--INPUT-->
+                                    <div class="mv-inner-flex-input mv-margin-left-50">
+                                        <strong>{{ auftragOhneMwst }}</strong>
+                                    </div>
+                                </div>
+
+                                <div class="mv-inner-flexbox" >
+                                    <!--LABEL-->
+                                    <div class="mv-inner-flex-label mv-width">
+                                        <label for="dialogAbsender_name">+ Umsatzsteuer 19%</label>
+                                    </div>
+                                    <!--INPUT-->
+                                    <div class="mv-inner-flex-input mv-margin-left-50">
+                                        {{ auftragMwst }}
+                                    </div>
+                                </div>
+
+                                <div class="mv-inner-flexbox" >
+                                    <!--LABEL-->
+                                    <div class="mv-inner-flex-label mv-width">
+                                        <label for="dialogAbsender_name"><strong>Rechnungsbetrag</strong></label>
+                                    </div>
+                                    <!--INPUT-->
+                                    <div class="mv-inner-flex-input mv-margin-left-50">
+                                        <strong>{{ auftragMitMwst }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </form>
+        </div>
+        <div class="dialog__footer">
+            <a class="btn btn--context" onClick="closeDialog()">Close</a>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    require(['jquery', 'jquery/ui'], function($){
+
+        $('#form').submit(false);
+
+        checkIfDialogCanBeOpened = function () {
+            let form = document.getElementById("form");
+            if (form.checkValidity()){
+                openDialog();
+            }
+        };
+
+        closeDialog = function() {
+            let dialogWrapper = document.getElementsByClassName("dialog__wrapper")[0];
+            dialogWrapper.classList.remove("dialog__wrapper--opened");
+        };
+
+        let openDialog = function() {
+            var dialogWrapper = document.getElementsByClassName("dialog__wrapper")[0];
+            dialogWrapper.classList.add("dialog__wrapper--opened");
+        };
+    });
+</script>
+
+
