@@ -1,6 +1,7 @@
 /**
- * TODO - Create Form and send data to Controller
- * TODO - Lookup all patternns if they are working
+ * TODO - Lookup all patternns if they are working+
+ * TODO - Create CSV Fron Data
+ * TODO - Check which data is needed
  *
  * @author Moritz Vogt
  */
@@ -28,6 +29,9 @@ window.onload = function () {
     let inputRadioStandardZustelltermin = document.getElementById('zustelltermin_standard');
     let inputRadioStandardSonderdienste = document.getElementById('sonderdienst_standard');
 
+    // Copy Button
+    let buttonCopyAbsender = document.getElementById('mv-copy-button-abs');
+
     // Disable Radio button for
     inputRadioStandardAbholzeit.disabled = true;
     inputCalculateInsuranceNo.disabled = true;
@@ -41,8 +45,17 @@ window.onload = function () {
     submitInklMwst.value = `${submitinklres.toFixed(2)}`;
     submitKg.value = "3,00";
 
+    // Set´s button visible when cookie is available
+    if(getCookieValue("firma")) {
+        buttonCopyAbsender.style.display = 'initial';
+    }
+
 };
 
+function getCookieValue(a) {
+    var b = document.cookie.match('(^|;)\\s*' + a + '\\s*=\\s*([^;]+)');
+    return b ? b.pop() : '';
+}
 /**
  * Calculates transportvericherungs input field and submitFields
  */
@@ -426,51 +439,33 @@ function calculateSubmitFieldswithSonderTermin(sonderDienstType) {
 }
 
 /**
- * This function copy values from "Empfänger" to "Absender" or "Absender" to "Empfänger"
- * @param val
+ * This function copy values from cookies
  */
-function copyValues(val) {
-
-    // Getter Empfänger
-    let inputEmpfFirma = document.getElementById('empfaenger_name');
-    let inputEmpfZusatz = document.getElementById('empfaenger_zusatz');
-    let inputEmpfAnsprechpartner = document.getElementById('empfaenger_ansprechpartner');
-    let inputEmpfStr = document.getElementById('empfaenger_str');
-    let inputEmpfHausNr = document.getElementById('empfaenger_hausnr');
-    let inputEmpfPlz = document.getElementById('empfaenger_plz');
-    let inputEmpfOrt = document.getElementById('empfaenger_ort');
-    let inputEmpfTel = document.getElementById('empfaenger_tel');
+function copyValues() {
 
     // Getter Absender
     let inputAbsFirma = document.getElementById('absender_name');
-    let inputAbsZusatz = document.getElementById('absender_zusatz');
-    let inputAbsAnsprechpartner = document.getElementById('absender_ansprechpartner');
     let inputAbsStr = document.getElementById('absender_str');
     let inputAbsHausNr = document.getElementById('absender_hausnr');
     let inputAbsPlz = document.getElementById('absender_plz');
     let inputAbsOrt = document.getElementById('absender_ort');
-    let inputAbsFTel = document.getElementById('absender_tel');
+    let inputAbsZusatz = document.getElementById('absender_zusatz');
+    let inputAbsAnsprech = document.getElementById('absender_ansprechpartner');
 
-    // Logic
-    if ( val === 'empf'){
-        inputEmpfFirma.value = inputAbsFirma.value;
-        inputEmpfZusatz.value = inputAbsZusatz.value;
-        inputEmpfAnsprechpartner.value = inputAbsAnsprechpartner.value;
-        inputEmpfStr.value = inputAbsStr.value;
-        inputEmpfHausNr.value = inputAbsHausNr.value;
-        inputEmpfPlz.value = inputAbsPlz.value;
-        inputEmpfOrt.value = inputAbsOrt.value;
-        inputEmpfTel.value = inputAbsFTel.value;
-    }else if (val === 'abs') {
-        inputAbsFirma.value = inputEmpfFirma.value;
-        inputAbsZusatz.value = inputEmpfZusatz.value;
-        inputAbsAnsprechpartner.value = inputEmpfAnsprechpartner.value;
-        inputAbsStr.value = inputEmpfStr.value;
-        inputAbsHausNr.value = inputEmpfHausNr.value;
-        inputAbsPlz.value = inputEmpfPlz.value;
-        inputAbsOrt.value = inputEmpfOrt.value;
-        inputAbsFTel.value = inputEmpfTel.value;
-    }
+    // Auftragsbest
+    let inputEmail = document.getElementById('auftragsbest_email');
+    let inputTel = document.getElementById('auftragsbest_tel');
+
+    // COOKIE
+    inputAbsFirma.value = getCookieValue("firma");
+    inputAbsStr.value = getCookieValue("str");
+    inputAbsHausNr.value = getCookieValue("hausnr");
+    inputAbsPlz.value = getCookieValue("plz");
+    inputAbsOrt.value = getCookieValue("ort");
+    inputEmail.value = getCookieValue("email");
+    inputTel.value = getCookieValue("tel");
+    inputAbsAnsprech.value = getCookieValue("ansprech");
+    inputAbsZusatz.value = getCookieValue("zusatz");
 }
 
 /**
@@ -493,6 +488,8 @@ function validateRequiredFields() {
     let inputAbsPlz = document.getElementById('absender_plz');
     let inputAbsOrt = document.getElementById('absender_ort');
     let inputSelectAbsLand = document.getElementById('absender_land');
+    let inputAbsZusatz = document.getElementById('absender_zusatz');
+    let inputAbsAnsprech = document.getElementById('absender_ansprechpartner');
 
     // Getter Abolzeit
     let inputSelectAbholDatum = document.getElementById('abholzeit_abholdatum');
@@ -522,6 +519,10 @@ function validateRequiredFields() {
     let submitExlMwst = document.getElementById('submit_exkl-mwst');
     let submitInklMwst = document.getElementById('submit_inkl-mwst');
 
+    // Auftragsbest
+    let inputEmail = document.getElementById('auftragsbest_email');
+    let inputTel = document.getElementById('auftragsbest_tel');
+
     // Getter
     let allInputs = document.getElementsByTagName("input");
     let form = document.getElementById('form');
@@ -539,6 +540,15 @@ function validateRequiredFields() {
       formDataObject.absData.strHausNr = inputAbsStr.value + " - " + inputAbsHausNr.value;
       formDataObject.absData.plzOrt = inputAbsPlz.value + " - " + inputAbsOrt.value;
       formDataObject.absData.land = inputSelectAbsLand.options[inputSelectAbsLand.selectedIndex].value;
+      document.cookie = "firma=" + formDataObject.absData.absname;
+      document.cookie = "str=" + inputAbsStr.value;
+      document.cookie = "hausnr=" + inputAbsHausNr.value;
+      document.cookie = "plz=" + inputAbsPlz.value;
+      document.cookie = "ort=" + inputAbsOrt.value;
+      document.cookie = "email=" + inputEmail.value;
+      document.cookie = "tel=" + inputTel.value;
+      document.cookie = "ansprech=" + inputAbsAnsprech.value;
+      document.cookie = "zusatz=" + inputAbsZusatz.value;
 
       // Empfänger
       formDataObject.empfData.empfname = inputEmpfFirma.value;
@@ -569,7 +579,6 @@ function validateRequiredFields() {
       formDataObject.auftrag.auftragMwst = parseFloat(submitInklMwst.value - submitExlMwst.value).toFixed(2) + " EUR";
       formDataObject.auftrag.auftragMitMwst = submitInklMwst.value + " EUR";
 
-
       // Abholzeit
       formDataObject.abholZeitData.abholDatum = inputSelectAbholDatum.options[inputSelectAbholDatum.selectedIndex].value;
       if (inputRadioAbholStandard.checked){
@@ -598,7 +607,7 @@ function validateRequiredFields() {
       formDataObject.sendungsData.gewicht = inputSelectSendungsdatenKG.options[inputSelectSendungsdatenKG.selectedIndex].value + ",00 Kg";
       formDataObject.sendungsData.wert = inputSendungsdatenWert.value + ",00 EUR";
       if(inputRadioSendugnsdatenTransJa.checked) {
-          formDataObject.sendungsDataTransportVers.transportVers = inputSendugnsdatenTrans.value + " EUR";
+          formDataObject.sendungsDataTransportVers.transportVers = inputSendugnsdatenTrans.value + " EUR    ";
       }else {
           formDataObject.sendungsDataTransportVers.transportVers = "0,00 EUR";
       }
@@ -611,8 +620,6 @@ function validateRequiredFields() {
       w3.displayObject("dialogSendungsdaten_data", formDataObject.sendungsData);
       w3.displayObject("dialogSsendungsDataTransportVers_data", formDataObject.sendungsDataTransportVers);
   }
-
-
 }
 
 /**
@@ -648,6 +655,142 @@ function validateSpecificField(id) {
         }
         inputHtmlElement.classList.remove("invalidInputs")
     }
+}
+
+/**
+ * Sends request to Controller in Magento which creates an CSV file on the Server
+ */
+function createCSV() {
+    let xhttp = new XMLHttpRequest();
+    xhttp.open("POST", '', false);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+    xhttp.send(JSON.stringify(map(formDataObject)));
+}
+
+
+function map() {
+    // Getter
+    let inputEmpfStr = document.getElementById('empfaenger_str');
+    let inputEmpfHausNr = document.getElementById('empfaenger_hausnr');
+    let inputEmpfPlz = document.getElementById('empfaenger_plz');
+    let inputEmpfOrt = document.getElementById('empfaenger_ort');
+    let inputEmpfAnsprech = document.getElementById('empfaenger_ansprechpartner');
+    let inputEmpfZusatz= document.getElementById('empfaenger_zusatz');
+
+    let inputAbsStr = document.getElementById('absender_str');
+    let inputAbsHausNr = document.getElementById('absender_hausnr');
+    let inputAbsPlz = document.getElementById('absender_plz');
+    let inputAbsOrt = document.getElementById('absender_ort');
+    let inputAbsAnsprech = document.getElementById('absender_ansprechpartner');
+    let inputAbsZusatz = document.getElementById('absender_zusatz');
+
+    let inputSelectAbholDatum = document.getElementById('abholzeit_abholdatum');
+    let inputRadioAbholStandard = document.getElementById('abolzeit_standard');
+    let inputSelectAbholWunsch = document.getElementById('abholzeit_wunsch');
+
+    // Getter ZustellerTermin
+    let inputSelectZustellFixTermin = document.getElementById('zustelltermin_fix_select');
+    let inputRadioZustellStandard = document.getElementById('zustelltermin_standard');
+    let inputRadioZustellTermin9 = document.getElementById('zustelltermin_termin_9');
+    let inputRadioZustellTermin10 = document.getElementById('zustelltermin_termin_10');
+    let inputRadioZustellTermin12 = document.getElementById('zustelltermin_termin_12');
+    let inputRadioZustellTerminFix = document.getElementById('zustelltermin_fix');
+
+    // Getter Sonderdienst
+    let inputRadioSonderdienstStandard = document.getElementById('sonderdienst_standard');
+    let inputRadioSonderdienstPersoenlich = document.getElementById('sonderdienst_persoenlich');
+    let inputRadioSonderdienstPersoenlichWithIdent = document.getElementById('sonderdienst_persoenlich_withIdent');
+
+    // Getter Sendungsdaten
+    let inputSelectSendungsdatenKG = document.getElementById('sendungsdaten_kg');
+    let inputSendungsdatenWert = document.getElementById('sendungsdaten_wert');
+
+    let inputRadioAuftragsbestAbs = document.getElementById('auftragsbest_absender');
+    let inputRadioAuftragsbestEmpf = document.getElementById('auftragsbest_empfaenger');
+    let inputRadioAuftragsbestMan = document.getElementById('auftragsbest_manuell');
+
+    let inputRadioAuftragsBestName = document.getElementById('auftragsbest_name');
+    let inputRadioAuftragsBestStr = document.getElementById('auftragsbest_str');
+    let inputRadioAuftragsBestHausNr = document.getElementById('auftragsbest_hausnr');
+    let inputRadioAuftragsBestPlz = document.getElementById('auftragsbest_plz');
+    let inputRadioAuftragsBestOrt = document.getElementById('auftragsbest_ort');
+    let inputRadioAuftragsBestZusatz = document.getElementById('auftragsbest_zusatz');
+
+    let csvData = new CsvData();
+    csvData.absName = formDataObject.absData.absname;
+    csvData.absZusatz = inputAbsZusatz.value;
+    csvData.absAnsprech = inputAbsAnsprech.value;
+    csvData.absStr = inputAbsStr.value;
+    csvData.absHausNr= inputAbsHausNr.value;
+    csvData.absPlz = inputAbsPlz.value;
+    csvData.absOrt = inputAbsOrt.value;
+    csvData.absLand = formDataObject.absData.land;
+
+    csvData.empfName = formDataObject.empfData.empfname;
+    csvData.empfZusatz = inputEmpfZusatz.value;
+    csvData.empfAnsprech = inputEmpfAnsprech.value;
+    csvData.empfStr = inputEmpfStr.value;
+    csvData.empfHausNr= inputEmpfHausNr.value;
+    csvData.empfPlz = inputEmpfPlz.value;
+    csvData.empfOrt = inputEmpfOrt.value;
+    csvData.empfLand = formDataObject.absData.land;
+
+    csvData.abholDatum = inputSelectAbholDatum.options[inputSelectAbholDatum.selectedIndex].value;
+    if (inputRadioAbholStandard.checked){
+        csvData.abholTermin = "standard"
+    } else {
+        csvData.abholTermin = "wunsch";
+        csvData.abholTerminZeit = inputSelectAbholWunsch.options[inputSelectAbholWunsch.selectedIndex].value
+    }
+
+    if(inputRadioZustellStandard.checked) {
+        csvData.zustellerTermin = "standard";
+    } else if (inputRadioZustellTermin9.checked) {
+        csvData.zustellerTermin = "09:00";
+    } else if (inputRadioZustellTermin10.checked) {
+        csvData.zustellerTermin = "10:00";
+    } else if (inputRadioZustellTermin12.checked) {
+        csvData.zustellerTermin = "12:00";
+    } else if (inputRadioZustellTerminFix.checked) {
+        csvData.zustellerTermin = inputSelectZustellFixTermin.options[inputSelectZustellFixTermin.selectedIndex].value;
+    }
+
+    // Sonderdienst
+    if(inputRadioSonderdienstStandard.checked) {
+        csvData.sonderdienstTermin = "standard";
+    } else if(inputRadioSonderdienstPersoenlich.checked){
+        csvData.sonderdienstTermin = "persönlich";
+    } else if(inputRadioSonderdienstPersoenlichWithIdent.checked){
+        csvData.sonderdienstTermin = "ident";
+    }
+
+    csvData.gewicht = inputSelectSendungsdatenKG.options[inputSelectSendungsdatenKG.selectedIndex].value;
+    csvData.wert = inputSendungsdatenWert.value;
+
+    if(inputRadioAuftragsbestAbs.checked) {
+        csvData.rechName = csvData.absName;
+        csvData.rechZusatz = csvData.absZusatz;
+        csvData.rechStr = csvData.absStr;
+        csvData.rechHausNr = csvData.absHausNr;
+        csvData.rechPlz = csvData.absPlz;
+        csvData.rechOrt = csvData.absOrt;
+    } else if(inputRadioAuftragsbestEmpf.checked) {
+        csvData.rechName = csvData.empfName;
+        csvData.rechZusatz = csvData.empfZusatz;
+        csvData.rechStr = csvData.empfStr;
+        csvData.rechHausNr = csvData.empfHausNr;
+        csvData.rechPlz = csvData.empfPlz;
+        csvData.rechOrt = csvData.empfOrt;
+    } else if(inputRadioAuftragsbestMan.checked) {
+        csvData.rechName = inputRadioAuftragsBestName.value;
+        csvData.rechZusatz = inputRadioAuftragsBestZusatz.value;
+        csvData.rechStr = inputRadioAuftragsBestStr.value;
+        csvData.rechHausNr = inputRadioAuftragsBestHausNr.value;
+        csvData.rechPlz = inputRadioAuftragsBestPlz.value;
+        csvData.rechOrt = inputRadioAuftragsBestOrt.value;
+    }
+    return csvData;
 }
 
 // DATA MODELS
@@ -697,5 +840,50 @@ function AuftragWert() {
 }
 function SendugsDataTransport() {
     this.transportVers;
-
 }
+
+function CsvData() {
+    // ABSENDER
+    this.absName;
+    this.absZusatz;
+    this.absAnsprech;
+    this.absStr;
+    this.absHausNr;
+    this.absPlz;
+    this.absOrt;
+    this.absLand;
+
+    // EMPFÄNGER
+    this.empfName;
+    this.empfZusatz;
+    this.empfAnsprech;
+    this.empfStr;
+    this.empfHausNr;
+    this.empfPlz;
+    this.empfOrt;
+    this.empfLand;
+
+    // ABHOLZEIT
+    this.abholDatum;
+    this.abholTermin;
+    this.abholTerminZeit;
+
+    // ZUSTELLERTERMIN
+    this.zustellerTermin;
+
+    // SONDERDIENST
+    this.sonderdienstTermin;
+
+    // SENDUNGSDATEN
+    this.gewicht;
+    this.wert;
+
+    // Rechnungs addresse
+    this.rechName;
+    this.rechZusatz;
+    this.rechStr;
+    this.rechHausNr;
+    this.rechPlz;
+    this.rechOrt;
+}
+

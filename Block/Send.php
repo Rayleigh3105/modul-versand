@@ -9,28 +9,11 @@ class Send extends \Magento\Framework\View\Element\Template
     }
 
     /**
-     * Get form action URL for POST booking request
-     *
-     * @return string
-     */
-    public function getFormAction()
-    {
-        // companymodule is given in routes.xml
-        // controller_name is folder name inside controller folder
-        // action is php file name inside above controller_name folder
-
-        return 'delivery/inputform/national';
-        // here controller_name is index, action is booking
-    }
-
-    /**
      * Returns description for Tooltip
      * @return string
      */
     public function getRequiredFieldsDescription(){
-        return 'Diese Felder müssen ausgefüllt sein';
+                return 'Diese Felder müssen ausgefüllt sein';
     }
-
-
 
 }

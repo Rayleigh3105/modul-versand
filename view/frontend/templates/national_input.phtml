@@ -22,7 +22,7 @@ for ( $i = 0; $i <= 5; $i++) {
 
             <!--Copy Button -->
             <div class="mv-inner-flexbox" id="mv-last-flexbox">
-                <button id="mv-copy-button-abs" type="button" onclick="copyValues('abs')" title="Werte von Empfänger kopieren">Kopieren <--</button>
+                <button id="mv-copy-button-abs" type="button" onclick="copyValues()" title="Letzten Absender einfügen">Letzter Absender</button>
             </div>
             <!--Firma-->
             <div class="mv-inner-flexbox">
@@ -121,10 +121,6 @@ for ( $i = 0; $i <= 5; $i++) {
     <fieldset id="mv-fieldset-empfanger">
         <legend>EMPFÄNGER</legend>
         <div class="mv-outer-flex-item">
-            <!--Copy Button -->
-            <div class="mv-inner-flexbox" id="mv-last-flexbox">
-                <button id="mv-copy-button-empf" type="button" onclick="copyValues('empf')" title="Werte von Absender kopieren">--> Kopieren</button>
-            </div>
             <!--Firma-->
             <div class="mv-inner-flexbox">
                 <!--LABEL-->
@@ -656,7 +652,7 @@ for ( $i = 0; $i <= 5; $i++) {
                     </div>
                     <!--INPUT 2 49-->
                     <div class="mv-inner-flex-49">
-                        <input type="text" id="auftragsbest_ort" onkeyup="validateSpecificField('auftragsbest_ort')" class="ort"  title="Ort darf maximal 128 Zeichen groß sein.">
+                        <input type="text" id="auftragsbest_ort" onkeyup="validateSpecificField('auftragsbest_ort')" class="ort"  title="Ort darf maximal 128 Zeichen groß sein." disabled>
                     </div>
                 </div>
             </div>
@@ -685,7 +681,7 @@ for ( $i = 0; $i <= 5; $i++) {
 <div class="dialog__wrapper">
     <div class="dialog">
         <div class="dialog__content">
-            <form action="<?php echo $block->getFormAction() ?>" name="confirmForm">
+            <form name="confirmForm" onsubmit="createCSV()" id="confirmForm">
                 <div class="flexbox">
                     <div class="mv-outer-flex-item" id="dialogAbsender_data">
                         <!--ABSENDER-->
@@ -930,18 +926,21 @@ for ( $i = 0; $i <= 5; $i++) {
                             </div>
                         </div>
                     </div>
-            </form>
         </div>
         <div class="dialog__footer">
             <a class="btn btn--context" onClick="closeDialog()">Close</a>
+            <button type="submit">Abschicken</button>
         </div>
-    </div>
+            </form>
+
+        </div>
 </div>
 
 <script type="text/javascript">
     require(['jquery', 'jquery/ui'], function($){
 
         $('#form').submit(false);
+        $('#confirmForm').submit(false);
 
         checkIfDialogCanBeOpened = function () {
             let form = document.getElementById("form");
@@ -949,6 +948,45 @@ for ( $i = 0; $i <= 5; $i++) {
                 openDialog();
             }
         };
+
+        $('#absender_plz').bind('keyup change', function(e) {
+            if ($(this).val().length > 4) {
+                var ort = $('#absender_ort');
+                $.getJSON('http://www.geonames.org/postalCodeLookupJSON?&country=DE&callback=?', {postalcode: this.value }, function(response) {
+                    if (response && response.postalcodes.length && response.postalcodes[0].placeName) {
+                        ort.val(response.postalcodes[0].placeName);
+                    }
+                })
+            } else {
+                $('#absender_ort').val('');
+            }
+        });
+
+        $('#empfaenger_plz').bind('keyup change', function(e) {
+            if ($(this).val().length > 4) {
+                var ort = $('#empfaenger_ort');
+                $.getJSON('http://www.geonames.org/postalCodeLookupJSON?&country=DE&callback=?', {postalcode: this.value }, function(response) {
+                    if (response && response.postalcodes.length && response.postalcodes[0].placeName) {
+                        ort.val(response.postalcodes[0].placeName);
+                    }
+                })
+            } else {
+                $('#empfaenger_ort').val('');
+            }
+        });
+
+        $('#auftragsbest_plz').bind('keyup change', function(e) {
+            if ($(this).val().length > 4) {
+                var ort = $('#auftragsbest_ort');
+                $.getJSON('http://www.geonames.org/postalCodeLookupJSON?&country=DE&callback=?', {postalcode: this.value }, function(response) {
+                    if (response && response.postalcodes.length && response.postalcodes[0].placeName) {
+                        ort.val(response.postalcodes[0].placeName);
+                    }
+                })
+            } else {
+                $('#auftragsbest_ort').val('');
+            }
+        });
 
         closeDialog = function() {
             let dialogWrapper = document.getElementsByClassName("dialog__wrapper")[0];

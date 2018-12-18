@@ -14,36 +14,59 @@ class National extends \Magento\Framework\App\Action\Action
         return parent::__construct($context);
     }
 
-    /**
-     * Booking action
-     *
-     * @return void
-     */
     public function execute()
     {
-        // 1. POST request : Get booking data
-        $post = (array) $this->getRequest()->getPost();
+        $json_obj =  file_get_contents("php://input");
+        $filePath = time()."_data.csv";
 
-        if (!empty($post)) {
-            // Retrieve your form data
-            $firstname   = $post['firstname'];
-            $lastname    = $post['lastname'];
-            $phone       = $post['phone'];
-            $bookingTime = $post['bookingTime'];
-
-            // Doing-something with...
-
-            // Display the succes form validation message
-            $this->messageManager->addSuccessMessage('Booking done !');
-
-            // Redirect to your form page (or anywhere you want...)
-            $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
-            $resultRedirect->setUrl('/hello');
-
-            return $resultRedirect;
+        if (!empty($json_obj)) {
+            $this->jsonToCsv($json_obj, $filePath, false);
         }
+
+
         // 2. GET request : Render the booking page
         $this->_view->loadLayout();
         $this->_view->renderLayout();
+    }
+
+    /**
+     * @param $json
+     * @param bool $csvFilePath
+     * @param bool $boolOutputFile
+     */
+    function jsonToCsv ($json, $csvFilePath = false, $boolOutputFile = false) {
+
+        // See if the string contains something
+        if (empty($json)) {
+            die("The JSON string is empty!");
+        }
+
+        // If passed a string, turn it into an array
+        if (is_array($json) === false) {
+            $json = json_decode($json, true);
+        }
+
+        // If a path is included, open that file for handling. Otherwise, use a temp file (for echoing CSV string)
+        if ($csvFilePath !== false) {
+            $f = fopen($csvFilePath,'w+');
+            if ($f === false) {
+                die("Couldn't create the file to store the CSV, or the path is invalid. Make sure you're including the full path, INCLUDING the name of the output file (e.g. '../save/path/csvOutput.csv')");
+            }
+        }
+        $data = null;
+        // Get array Keys
+        $arrayKeys = array_keys($json);
+        // Fetch last arra key
+        $lastArrayKey = array_pop($arrayKeys);
+        foreach ($json as $line) {
+            // Check if it is the last element of the Array
+            if ($line === $lastArrayKey) {
+                $data = $data.$line;
+            } else {
+                $data = $data.$line.";";
+            }
+        }
+        // Put file into specific path
+        file_put_contents($csvFilePath, $data);
     }
 }
