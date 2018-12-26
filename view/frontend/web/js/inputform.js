@@ -1,7 +1,6 @@
 /**
- * TODO - Lookup all patternns if they are working+
- * TODO - Create CSV Fron Data
- * TODO - Check which data is needed
+ * TODO - Google vervollständigkeits API
+ * TODO - clear error
  *
  * @author Moritz Vogt
  */
@@ -31,6 +30,12 @@ window.onload = function () {
 
     // Copy Button
     let buttonCopyAbsender = document.getElementById('mv-copy-button-abs');
+    // Set´s button visible when cookie is available
+    if(getCookieValue("firma")) {
+        buttonCopyAbsender.style.display = 'initial';
+    }else {
+        buttonCopyAbsender.style.display = 'none';
+    }
 
     // Disable Radio button for
     inputRadioStandardAbholzeit.disabled = true;
@@ -44,16 +49,10 @@ window.onload = function () {
 
     submitInklMwst.value = `${submitinklres.toFixed(2)}`;
     submitKg.value = "3,00";
-
-    // Set´s button visible when cookie is available
-    if(getCookieValue("firma")) {
-        buttonCopyAbsender.style.display = 'initial';
-    }
-
 };
 
 function getCookieValue(a) {
-    var b = document.cookie.match('(^|;)\\s*' + a + '\\s*=\\s*([^;]+)');
+    let b = document.cookie.match('(^|;)\\s*' + a + '\\s*=\\s*([^;]+)');
     return b ? b.pop() : '';
 }
 /**
@@ -471,7 +470,7 @@ function copyValues() {
 /**
  * Validates all Input fields
  */
-function validateRequiredFields() {
+function validateRequiredFields(isGross) {
 
     // Getter Empfänger
     let inputEmpfFirma = document.getElementById('empfaenger_name');
@@ -514,6 +513,7 @@ function validateRequiredFields() {
     let inputSendungsdatenWert = document.getElementById('sendungsdaten_wert');
     let inputSendugnsdatenTrans = document.getElementById('sendungdaten_transportversicherung');
     let inputRadioSendugnsdatenTransJa = document.getElementById('sendungsdaten_sendungsdaten-ja');
+    let inputSelectedSendungsdatenArtWare = document.getElementById('sendungsdaten_art');
 
     // Submit fields
     let submitExlMwst = document.getElementById('submit_exkl-mwst');
@@ -559,66 +559,100 @@ function validateRequiredFields() {
       // Zustelltermin
       if(inputRadioZustellStandard.checked) {
           formDataObject.zustellerTerminData.zustellerTermin = "Standardzustelltermin";
-          formDataObject.zustellerTerminData.kosten = "0,00 EUR";
+          if (isGross !== "1"){
+              formDataObject.zustellerTerminData.kosten = "0,00 EUR";
+          }
       } else if (inputRadioZustellTermin9.checked) {
           formDataObject.zustellerTerminData.zustellerTermin = "Termin bis 09:00 Uhr";
-          formDataObject.zustellerTerminData.kosten = "15,50 EUR";
+          if (isGross !== "1"){
+              formDataObject.zustellerTerminData.kosten = "15,50 EUR";
+          }
       } else if (inputRadioZustellTermin10.checked) {
           formDataObject.zustellerTerminData.zustellerTermin = "Termin bis 10:00 Uhr";
-          formDataObject.zustellerTerminData.kosten = "13,00 EUR";
+          if (isGross !== "1"){
+              formDataObject.zustellerTerminData.kosten = "13,00 EUR";
+          }
       } else if (inputRadioZustellTermin12.checked) {
           formDataObject.zustellerTerminData.zustellerTermin = "Termin bis 12:00 Uhr";
-          formDataObject.zustellerTerminData.kosten = "8,00 EUR";
+          if (isGross !== "1"){
+              formDataObject.zustellerTerminData.kosten = "8,00 EUR";
+          }
       } else if (inputRadioZustellTerminFix.checked) {
           formDataObject.zustellerTerminData.zustellerTermin = "Fixtermin (" + inputSelectZustellFixTermin.options[inputSelectZustellFixTermin.selectedIndex].value + " Uhr)";
-          formDataObject.zustellerTerminData.kosten = "40,00 EUR";
+          if (isGross !== "1"){
+              formDataObject.zustellerTerminData.kosten = "40,00 EUR";
+          }
       }
 
       // Preis
-      formDataObject.auftrag.auftragOhneMwst = submitExlMwst.value + " EUR";
-      formDataObject.auftrag.auftragMwst = parseFloat(submitInklMwst.value - submitExlMwst.value).toFixed(2) + " EUR";
-      formDataObject.auftrag.auftragMitMwst = submitInklMwst.value + " EUR";
+      if (isGross !== "1"){
+          formDataObject.auftrag.auftragOhneMwst = submitExlMwst.value + " EUR";
+          formDataObject.auftrag.auftragMwst = parseFloat(submitInklMwst.value - submitExlMwst.value).toFixed(2) + " EUR";
+          formDataObject.auftrag.auftragMitMwst = submitInklMwst.value + " EUR";
+      }
 
       // Abholzeit
       formDataObject.abholZeitData.abholDatum = inputSelectAbholDatum.options[inputSelectAbholDatum.selectedIndex].value;
       if (inputRadioAbholStandard.checked){
           formDataObject.abholZeitData.abholTermin = "Standardabholtermin (zwischen 09:00 - 17:00 Uhr)";
-          formDataObject.abholZeitData.kosten = "0,00 EUR"
+          if (isGross !== "1"){
+              formDataObject.abholZeitData.kosten = "0,00 EUR"
+          }
       } else {
           formDataObject.abholZeitData.abholTermin = "Wunschtermin (" + inputSelectAbholWunsch.options[inputSelectAbholWunsch.selectedIndex].value + " Uhr)";
-          formDataObject.abholZeitData.kosten = "5,50 EUR"
+          if (isGross !== "1"){
+              formDataObject.abholZeitData.kosten = "5,50 EUR"
+          }
 
       }
 
       // Sonderdienst
       if(inputRadioSonderdienstStandard.checked) {
           formDataObject.sonderdienstData.sonderdienstTermin = "Standardzustellung";
-          formDataObject.sonderdienstData.kosten = "0,00 EUR"
+          if (isGross !== "1"){
+              formDataObject.sonderdienstData.kosten = "0,00 EUR"
+          }
       } else if(inputRadioSonderdienstPersoenlich.checked){
           formDataObject.sonderdienstData.sonderdienstTermin = "Persönliche Zustellung";
-          formDataObject.sonderdienstData.kosten = "8,50 EUR"
+          if (isGross !== "1"){
+              formDataObject.sonderdienstData.kosten = "8,50 EUR"
+          }
 
       } else if(inputRadioSonderdienstPersoenlichWithIdent.checked){
           formDataObject.sonderdienstData.sonderdienstTermin = "Persönliche Zustellung mit Identprüfung";
-          formDataObject.sonderdienstData.kosten = "10,50 EUR"
+          if (isGross !== "1"){
+              formDataObject.sonderdienstData.kosten = "10,50 EUR"
+          }
       }
 
       // Sendungsdaten
       formDataObject.sendungsData.gewicht = inputSelectSendungsdatenKG.options[inputSelectSendungsdatenKG.selectedIndex].value + ",00 Kg";
       formDataObject.sendungsData.wert = inputSendungsdatenWert.value + ",00 EUR";
-      if(inputRadioSendugnsdatenTransJa.checked) {
-          formDataObject.sendungsDataTransportVers.transportVers = inputSendugnsdatenTrans.value + " EUR    ";
-      }else {
-          formDataObject.sendungsDataTransportVers.transportVers = "0,00 EUR";
+      formDataObject.sendungsData.artWare = inputSelectedSendungsdatenArtWare.options[inputSelectedSendungsdatenArtWare.selectedIndex].value;
+      if (isGross !== "1"){
+          if(inputRadioSendugnsdatenTransJa.checked) {
+              formDataObject.sendungsDataTransportVers.transportVers = inputSendugnsdatenTrans.value + " EUR    ";
+          }else {
+              formDataObject.sendungsDataTransportVers.transportVers = "0,00 EUR";
+          }
       }
-      w3.displayObject("dialogAbsender_data", formDataObject.absData);
-      w3.displayObject("dialogEmpfaenger_data", formDataObject.empfData);
-      w3.displayObject("dialogZustelltermin_data", formDataObject.zustellerTerminData);
-      w3.displayObject("dialogAuftragswert_data", formDataObject.auftrag);
-      w3.displayObject("dialogAbholzeit_data", formDataObject.abholZeitData);
-      w3.displayObject("dialogSonderdienst_data", formDataObject.sonderdienstData);
-      w3.displayObject("dialogSendungsdaten_data", formDataObject.sendungsData);
-      w3.displayObject("dialogSsendungsDataTransportVers_data", formDataObject.sendungsDataTransportVers);
+      if( isGross === "0"){
+          w3.displayObject("dialogAbsender_data", formDataObject.absData);
+          w3.displayObject("dialogEmpfaenger_data", formDataObject.empfData);
+          w3.displayObject("dialogZustelltermin_data", formDataObject.zustellerTerminData);
+          w3.displayObject("dialogAuftragswert_data", formDataObject.auftrag);
+          w3.displayObject("dialogAbholzeit_data", formDataObject.abholZeitData);
+          w3.displayObject("dialogSonderdienst_data", formDataObject.sonderdienstData);
+          w3.displayObject("dialogSendungsdaten_data", formDataObject.sendungsData);
+          w3.displayObject("dialogSsendungsDataTransportVers_data", formDataObject.sendungsDataTransportVers);
+      }else {
+          w3.displayObject("dialogAbsender1_data", formDataObject.absData);
+          w3.displayObject("dialogEmpfaenger1_data", formDataObject.empfData);
+          w3.displayObject("dialogZustelltermin1_data", formDataObject.zustellerTerminData);
+          w3.displayObject("dialogAbholzeit1_data", formDataObject.abholZeitData);
+          w3.displayObject("dialogSonderdienst1_data", formDataObject.sonderdienstData);
+          w3.displayObject("dialogSendungsdaten1_data", formDataObject.sendungsData);
+      }
   }
 }
 
@@ -657,18 +691,6 @@ function validateSpecificField(id) {
     }
 }
 
-/**
- * Sends request to Controller in Magento which creates an CSV file on the Server
- */
-function createCSV() {
-    let xhttp = new XMLHttpRequest();
-    xhttp.open("POST", '', false);
-    xhttp.setRequestHeader("Content-type", "application/json");
-    xhttp.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-    xhttp.send(JSON.stringify(map(formDataObject)));
-}
-
-
 function map() {
     // Getter
     let inputEmpfStr = document.getElementById('empfaenger_str');
@@ -705,6 +727,7 @@ function map() {
     // Getter Sendungsdaten
     let inputSelectSendungsdatenKG = document.getElementById('sendungsdaten_kg');
     let inputSendungsdatenWert = document.getElementById('sendungsdaten_wert');
+    let inputSelectedSendungsdatenArtWare = document.getElementById('sendungsdaten_art');
 
     let inputRadioAuftragsbestAbs = document.getElementById('auftragsbest_absender');
     let inputRadioAuftragsbestEmpf = document.getElementById('auftragsbest_empfaenger');
@@ -767,6 +790,7 @@ function map() {
 
     csvData.gewicht = inputSelectSendungsdatenKG.options[inputSelectSendungsdatenKG.selectedIndex].value;
     csvData.wert = inputSendungsdatenWert.value;
+    csvData.artWare = inputSelectedSendungsdatenArtWare.options[inputSelectedSendungsdatenArtWare.selectedIndex].value;
 
     if(inputRadioAuftragsbestAbs.checked) {
         csvData.rechName = csvData.absName;
@@ -832,6 +856,7 @@ function SonderdienstData() {
 function SendungsData() {
     this.gewicht;
     this.wert;
+    this.artWare;
 }
 function AuftragWert() {
     this.auftragOhneMwst;
@@ -877,6 +902,7 @@ function CsvData() {
     // SENDUNGSDATEN
     this.gewicht;
     this.wert;
+    this.artWare;
 
     // Rechnungs addresse
     this.rechName;

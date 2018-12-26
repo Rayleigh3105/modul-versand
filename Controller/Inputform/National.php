@@ -16,13 +16,15 @@ class National extends \Magento\Framework\App\Action\Action
 
     public function execute()
     {
+        // 1. Get´s Input from Form in Frontend
         $json_obj =  file_get_contents("php://input");
-        $filePath = time()."_data.csv";
+        // Set File path and name
+        $filePath = "csv/".time()."_data.csv";
 
+        // Creates the CSV and saves it to the given filepath
         if (!empty($json_obj)) {
             $this->jsonToCsv($json_obj, $filePath, false);
         }
-
 
         // 2. GET request : Render the booking page
         $this->_view->loadLayout();
@@ -30,6 +32,8 @@ class National extends \Magento\Framework\App\Action\Action
     }
 
     /**
+     * Creates the CSV and saves it to the given filepath
+     *
      * @param $json
      * @param bool $csvFilePath
      * @param bool $boolOutputFile

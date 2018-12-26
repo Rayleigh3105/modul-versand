@@ -6,6 +6,7 @@
 
         <script src="Magento_VersandForm::js/inputform.js"/>
         <script src="Magento_VersandForm::js/w3.js"/>
+        <script src="Magento_VersandForm::js/moveit.js"/>
     </head>
     <body>
         <referenceContainer name="content">

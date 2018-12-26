@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="Camel24" translate="label" sortOrder="10">
+            <label>Camel 24</label>
+        </tab>
+        <section id="versandform" translate="label" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Einstellung Groß Kunde</label>
+            <tab>Camel24</tab>
+            <resource>Magento_VersandForm::versandform_config</resource>
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>General Configuration</label>
+                <field id="bool_gross" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Groß Kunden Form benutzen?</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Wenn die Groß Kunden form angeschaltet ist wird die Berechnung der Preise nicht angezeigt.</comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
