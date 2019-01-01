@@ -17,6 +17,7 @@ for ( $i = 0; $i <= 5; $i++) {
 <!--Nicht für groß Kunden geeignete Submit form -->
 <?php if ($block->getDataFromAdminPanel() == "0") { ?>
     <form onsubmit="checkIfDialogCanBeOpened()" id="form"    >
+        <input type="hidden" name="form_key" value="<?php echo Mage::getSingleton('core/session')->getFormKey() ?>" />
 
     <!--ABSENDER && EPFÄNGER -->
     <div class="flexbox">
@@ -977,7 +978,7 @@ for ( $i = 0; $i <= 5; $i++) {
                     </div>
         </div>
                 <div class="dialog__footer mv-margin-top-15">
-                    <button class="btn" onClick="closeDialog()">Schließen</button>
+                    <a class="btn btn--context" onClick="closeDialog()">Schließen</a>
                     <button type="submit" class="mv-dialogSubmit-button" onClick="closeDialog()">Auftrag erteilen*</button>
                 </div>
             </form>
@@ -1057,7 +1058,7 @@ for ( $i = 0; $i <= 5; $i++) {
 <!--FÜR GROß KUNDEN -->
 <?php if ($block->getDataFromAdminPanel() == "1") { ?>
     <form onsubmit="checkIfDialogCanBeOpened() " id="form">
-
+        <input type="hidden" name="form_key" value="<?php echo Mage::getSingleton('core/session')->getFormKey() ?>" />
         <div class="flexbox">
             <!--Absender-->
             <fieldset>
@@ -1534,7 +1535,7 @@ for ( $i = 0; $i <= 5; $i++) {
                         <!--INPUT-->
                         <div class="mv-inner-flex-input">
                             bis
-                            <select name="mv-select-sendungsdaten-kg" id="sendungsdaten_kg" onchange="updateSubmitFields()">
+                            <select name="mv-select-sendungsdaten-kg" id="sendungsdaten_kg">
                                 <option value="1">1,00 kg</option>
                                 <option value="2">2,00 kg</option>
                                 <option value="3" selected>3,00 kg</option>
@@ -1944,8 +1945,8 @@ for ( $i = 0; $i <= 5; $i++) {
                         </div>
                     </div>
                     <div class="dialog__footer mv-margin-top-15">
-                        <button class="btn" onClick="closeDialog()">Schließen</button>
-                        <button type="submit" class="mv-dialogSubmit-button" onClick="closeDialog()">Auftrag erteilen*</button>
+                        <a class="btn btn--context" onClick="closeDialog()">Schließen</a>
+                        <button type="submit" class="mv-dialogSubmit-button" onclick="closeDialog()">Auftrag erteilen*</button>
                     </div>
                 </form>
             </div>
@@ -2088,7 +2089,6 @@ for ( $i = 0; $i <= 5; $i++) {
             window.scrollTo(0,0);
             let dialogWrapper = document.getElementsByClassName("dialog__wrapper")[0];
             dialogWrapper.classList.add("dialog__wrapper--opened");
-
         };
 
 

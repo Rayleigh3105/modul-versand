@@ -1,6 +1,6 @@
 /**
  * TODO - Google vervollständigkeits API
- * TODO - clear error
+ * TODO - Wieso wird beim closen der andere dialog geöffnet
  *
  * @author Moritz Vogt
  */
